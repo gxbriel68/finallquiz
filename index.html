@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quizmania</title>
+
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Faster+One&display=swap" rel="stylesheet">
+
+  <style>
+    /* ... tu CSS exactamente igual ... */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      position: relative;
+      min-height: 100vh;
+      text-align: center;
+      overflow-x: hidden;
+      background-color: #f4f4f4;
+    }
+
+    body::before {
+      content: "";
+      background-image: url('img/logo.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      height: 100vh;
+      width: 100vw;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @media (min-width: 601px) {
+      body::before {
+        background-size: 900px;
+        opacity: 0.06;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body::before {
+        background-size: 350px;
+        opacity: 0.06;
+      }
+    }
+
+    h1 {
+      font-family: 'Faster One', cursive;
+      font-size: 80px;
+      margin-top: 30px;
+      color: #ffeb3b;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      letter-spacing: 6px;
+      transform: skewX(-5deg);
+      user-select: none;
+      animation: brillo-titulo 6s ease-in-out infinite;
+    }
+
+    @keyframes brillo-titulo {
+      0%, 100% {
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      }
+      50% {
+        text-shadow:
+          0 0 10px #fff,
+          0 0 15px #ffee58,
+          0 0 20px #fdd835;
+      }
+    }
+
+    .boton-categoria {
+      padding: 16px 28px;
+      font-size: 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .boton-categoria:active,
+    #mostrar-respuesta:active {
+      transform: scale(0.96);
+    }
+
+    .boton-categoria:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      opacity: 0.95;
+    }
+
+    .boton-categoria:focus-visible {
+      outline: 2px solid #000;
+    }
+
+    .cafe { background-color: #6D4C41; }
+    .verde { background-color: #43a047; }
+    .beige { background-color: #d7ccc8; color: #000; }
+    .azul { background-color: #2196f3; }
+    .rosa { background-color: #ec407a; }
+
+    .cuadro {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 25px;
+      padding: 25px;
+      margin: 20px auto;
+      max-width: 750px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #222;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .cuadro:hover {
+      transform: scale(1.01);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+    }
+
+    #respuesta {
+      margin-top: 10px;
+    }
+
+    #mostrar-respuesta {
+      background: linear-gradient(135deg, #8e24aa, #ba68c8);
+      color: white;
+      font-size: 20px;
+      padding: 16px 30px;
+      border: none;
+      border-radius: 16px;
+      font-weight: bold;
+      margin-bottom: 50px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    #mostrar-respuesta:hover {
+      background: linear-gradient(135deg, #ab47bc, #ce93d8);
+      transform: scale(1.04);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.3);
+    }
+
+    button {
+      font-family: 'Arial Black', sans-serif;
+    }
+
+    footer {
+      font-size: 14px;
+      color: #666;
+      padding: 20px 0;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        animation: none;
+        font-size: 60px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      }
+
+      .boton-categoria,
+      #mostrar-respuesta {
+        transition: none;
+        box-shadow: none;
+      }
+
+      .cuadro {
+        box-shadow: none;
+      }
+
+      footer {
+        font-size: 13px;
+        padding: 16px 0;
+      }
+    }
+
+    #btn-ayuda {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #ffca28;
+      color: #000;
+      border: none;
+      border-radius: 20px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 999;
+    }
+
+    #btn-ayuda:hover {
+      background-color: #ffc107;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+    }
+
+    .modal-contenido {
+      background-color: #fff8e1;
+      margin: 15% auto;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      font-size: 16px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .cerrar {
+      color: #d32f2f;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .cerrar:hover {
+      color: #b71c1c;
+    }
+
+    /* Estilos nuevos para confirmación y puntos */
+    #confirmacion-puntos {
+      margin-top: 20px;
+      background: #f3e5f5;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 6px 15px rgba(156, 39, 176, 0.4);
+      font-size: 18px;
+      font-weight: bold;
+      color: #4a148c;
+      display: none;
+    }
+
+    #confirmacion-puntos button {
+      background: #7b1fa2;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      padding: 12px 22px;
+      margin: 0 15px;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 17px;
+      box-shadow: 0 4px 12px rgba(123, 31, 162, 0.6);
+      transition: background-color 0.3s ease;
+    }
+
+    #confirmacion-puntos button:hover {
+      background: #4a148c;
+      box-shadow: 0 6px 16px rgba(74, 20, 140, 0.8);
+    }
+
+    #mensaje-puntos {
+      margin-top: 15px;
+      font-size: 20px;
+      color: #1b5e20;
+      text-shadow: 1px 1px 2px #c8e6c9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quizmania</h1>
+
+  <div>
+    <button class="boton-categoria cafe" onclick="mostrarPregunta('cafe')">Historia</button>
+    <button class="boton-categoria verde" onclick="mostrarPregunta('verde')">Ciencia</button>
+    <button class="boton-categoria beige" onclick="mostrarPregunta('beige')">Arte y Literatura</button>
+    <button class="boton-categoria azul" onclick="mostrarPregunta('azul')">Deportes</button>
+    <button class="boton-categoria rosa" onclick="mostrarPregunta('rosa')">Entretenimiento</button>
+  </div>
+
+  <div id="pregunta" class="cuadro"></div>
+  <div id="respuesta" class="cuadro"></div>
+
+  <button id="mostrar-respuesta" onclick="mostrarRespuesta()">Mostrar Respuesta</button>
+
+  <!-- Contenedor para confirmar si respondieron bien -->
+  <div id="confirmacion-puntos">
+    <div>¿La respondiste bien?</div>
+    <button onclick="respuestaUsuario(true)">Sí</button>
+    <button onclick="respuestaUsuario(false)">No</button>
+    <div id="mensaje-puntos"></div>
+  </div>
+
+  <footer>
+    © 2025 Quizmania - Todos los derechos reservados para 2 estudiantees de diseño grafico y 1 estudiante de diseño interactivo
+  </footer>
+
+  <!-- Botón de ayuda -->
+  <button id="btn-ayuda" onclick="abrirModal()">❓ Ayuda</button>
+
+  <!-- Modal de bienvenida -->
+  <div id="modal-bienvenida" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar" onclick="cerrarBienvenida()">&times;</span>
+      <p>
+        🎉 <strong>¡Bienvenido a Quizmania!</strong><br><br>
+ Quizmania es un divertido y dinámico juego de mesa de cultura general diseñado para desafiar tus conocimientos y aprender mientras te diviertes.<br><br>
+        Perfecto para jugar con amigos y familia, Quizmania te ofrece preguntas interesantes en distintas categorías para que cada partida sea única y entretenida.<br><br>
+        ¿Te animas a probar quién sabe más? ¡Elige tu categoría y demuestra que eres el campeón del conocimiento!<br><br>
+        ¡Gracias por visitar Quizmania y que disfrutes el juego! 🧠✨
+        <br><br>
+        PD: Toca el boton de ayuda para recibir indicaciones de como mejorar la vista del juego en tu celular!.<br><br>
+      </p>
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal de ayuda -->
+  <div id="modal-ayuda" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar" onclick="cerrarModal()">&times;</span>
+      <p>
+📱 Para una mejor experiencia de juego, te recomendamos activar la vista de escritorio: En la parte superior del navegador (los tres puntos), selecciona "Sitio para computadora" luego pon el celular en horizontal y listo!<br><br>
+        ⬇️ Para continuar, elige una categoría y responde las preguntas.<br><br>
+        ✔️ Presiona "Mostrar Respuesta" para ver la respuesta y confirma si acertaste o no para ganar puntos.<br><br>
+        💡 ¡Diviértete y aprende mucho!
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const preguntas = {
+      cafe: [
+{ pregunta: "¿Qué guerra se libró entre el norte y el sur de EE.UU.?", respuesta: "La Guerra Civil", dificultad: "facil" },
+{ pregunta: "¿Quién fue el dictador italiano durante la Segunda Guerra Mundial?", respuesta: "Benito Mussolini", dificultad: "dificil" },
+{ pregunta: "¿Qué imperio construyó el Coliseo?", respuesta: "El Imperio Romano", dificultad: "facil" },
+{ pregunta: "¿Quién fue el primer emperador romano?", respuesta: "Augusto", dificultad: "dificil" },
+{ pregunta: "¿Qué civilización usaba jeroglíficos?", respuesta: "La egipcia", dificultad: "facil" },
+{ pregunta: "¿Qué líder sudafricano luchó contra el apartheid?", respuesta: "Nelson Mandela", dificultad: "facil" },
+{ pregunta: "¿Qué país lanzó las bombas atómicas en Hiroshima y Nagasaki?", respuesta: "Estados Unidos", dificultad: "facil" },
+{ pregunta: "¿Qué tratado puso fin a la Primera Guerra Mundial?", respuesta: "El Tratado de Versalles", dificultad: "facil" },
+{ pregunta: "¿Quién fue el zar durante la Revolución Rusa?", respuesta: "Nicolás II", dificultad: "dificil" },
+{ pregunta: "¿Qué país fue invadido por Alemania para iniciar la Segunda Guerra Mundial?", respuesta: "Polonia", dificultad: "facil" },
+{ pregunta: "¿En qué año comenzó la Revolución Francesa?", respuesta: "1789", dificultad: "dificil" },
+{ pregunta: "¿Qué imperio estaba gobernado por los zares?", respuesta: "El Imperio Ruso", dificultad: "dificil" },
+{ pregunta: "¿Qué evento ocurrió el 11 de septiembre de 2001?", respuesta: "Los atentados a las Torres Gemelas", dificultad: "facil" },
+{ pregunta: "¿Cuál fue la última dinastía china?", respuesta: "La dinastía Qing", dificultad: "dificil" },
+{ pregunta: "¿Quién era el líder de los nazis?", respuesta: "Adolf Hitler", dificultad: "facil" },
+{ pregunta: "¿Qué guerra enfrentó a EE.UU. con Vietnam?", respuesta: "La Guerra de Vietnam", dificultad: "facil" },
+{ pregunta: "¿Quién descubrió la ruta marítima a la India?", respuesta: "Vasco da Gama", dificultad: "dificil" },
+{ pregunta: "¿Quién fue Juana de Arco?", respuesta: "Una heroína francesa y santa", dificultad: "dificil" },
+{ pregunta: "¿Qué país colonizó gran parte de América del Sur?", respuesta: "España", dificultad: "facil" },
+{ pregunta: "¿Quién fue Simón Bolívar?", respuesta: "El Libertador de América del Sur", dificultad: "facil" },
+{ pregunta: "¿Qué civilización creó el calendario maya?", respuesta: "La civilización maya", dificultad: "facil" },
+{ pregunta: "¿Quién escribió la Constitución de EE.UU.?", respuesta: "Varios padres fundadores", dificultad: "dificil" },
+{ pregunta: "¿Qué imperio cayó en 1453?", respuesta: "El Imperio Bizantino", dificultad: "dificil" },
+{ pregunta: "¿Qué rey francés fue guillotinado durante la Revolución?", respuesta: "Luis XVI", dificultad: "dificil" },
+{ pregunta: "¿Qué conflicto se llamó la Gran Guerra?", respuesta: "La Primera Guerra Mundial", dificultad: "facil" },
+{ pregunta: "¿Qué país fue gobernado por Stalin?", respuesta: "La Unión Soviética", dificultad: "facil" },
+{ pregunta: "¿Quién fue el primer presidente de Estados Unidos?", respuesta: "George Washington", dificultad: "facil" },
+{ pregunta: "¿En qué año comenzó la Segunda Guerra Mundial?", respuesta: "1939", dificultad: "facil" },
+{ pregunta: "¿Qué civilización construyó las pirámides?", respuesta: "Los egipcios", dificultad: "facil" },
+{ pregunta: "¿Quién descubrió América?", respuesta: "Cristóbal Colón", dificultad: "facil" },
+{ pregunta: "¿En qué año cayó el Muro de Berlín?", respuesta: "1989", dificultad: "facil" },
+{ pregunta: "¿Qué imperio dominó gran parte de Sudamérica antes de la llegada de los españoles?", respuesta: "El Imperio Inca", dificultad: "facil" },
+{ pregunta: "¿Cuál fue la causa principal de la Revolución Francesa?", respuesta: "La desigualdad social y económica", dificultad: "dificil" },
+{ pregunta: "¿Quién fue Napoleón Bonaparte?", respuesta: "Un líder militar y emperador francés", dificultad: "facil" },
+{ pregunta: "¿Cuál fue el resultado de la Guerra Civil de Estados Unidos?", respuesta: "La abolición de la esclavitud", dificultad: "dificil" },
+{ pregunta: "¿Quién fue la Reina de Inglaterra durante la época isabelina?", respuesta: "Isabel I", dificultad: "dificil" },
+{ pregunta: "¿Qué civilización antigua se ubicaba en Mesopotamia?", respuesta: "Los sumerios", dificultad: "dificil" },
+{ pregunta: "¿Qué evento marcó el inicio de la Edad Media?", respuesta: "La caída del Imperio Romano de Occidente", dificultad: "dificil" },
+{ pregunta: "¿En qué año se firmó la Declaración de Independencia de los Estados Unidos?", respuesta: "1776", dificultad: "facil" },
+{ pregunta: "¿Qué fue la Guerra Fría?", respuesta: "Un conflicto ideológico entre EE.UU. y la URSS", dificultad: "facil" },
+{ pregunta: "¿Qué evento detonó la Primera Guerra Mundial?", respuesta: "El asesinato del archiduque Francisco Fernando", dificultad: "dificil" },
+{ pregunta: "¿Quién fue Mahatma Gandhi?", respuesta: "Líder del movimiento de independencia de India", dificultad: "facil" },
+{ pregunta: "¿Qué imperio dominó gran parte de Europa durante la Edad Media?", respuesta: "El Imperio Romano Germánico", dificultad: "dificil" },
+{ pregunta: "¿Qué civilización construyó Machu Picchu?", respuesta: "Los incas", dificultad: "facil" },
+{ pregunta: "¿Qué era la ruta de la seda?", respuesta: "Una red de rutas comerciales entre Asia y Europa", dificultad: "dificil" },
+{ pregunta: "¿Cuál fue la capital del Imperio Azteca?", respuesta: "Tenochtitlán", dificultad: "facil" },
+{ pregunta: "¿Qué país fue conocido como la URSS?", respuesta: "La Unión Soviética", dificultad: "facil" },
+{ pregunta: "¿En qué año terminó la Primera Guerra Mundial?", respuesta: "1918", dificultad: "facil" }	
+
+      ],
+      verde: [
+{ pregunta: "¿Qué planeta es conocido como el planeta rojo?", respuesta: "Marte", dificultad: "facil" },
+{ pregunta: "¿Qué gas es esencial para la respiración humana?", respuesta: "Oxígeno", dificultad: "facil" },
+{ pregunta: "¿Cuál es el órgano encargado de bombear sangre en el cuerpo humano?", respuesta: "El corazón", dificultad: "facil" },
+{ pregunta: "¿Qué científico formuló la teoría de la relatividad?", respuesta: "Albert Einstein", dificultad: "dificil" },
+{ pregunta: "¿Cómo se llama el proceso por el cual las plantas fabrican su alimento?", respuesta: "Fotosíntesis", dificultad: "facil" },
+{ pregunta: "¿Cuál es el hueso más largo del cuerpo humano?", respuesta: "El fémur", dificultad: "facil" },
+{ pregunta: "¿Qué partícula tiene carga negativa?", respuesta: "Electrón", dificultad: "facil" },
+{ pregunta: "¿Qué tipo de energía proviene del sol?", respuesta: "Energía solar", dificultad: "facil" },
+{ pregunta: "¿Qué mamífero pone huevos?", respuesta: "Ornitorrinco", dificultad: "dificil" },
+{ pregunta: "¿Qué órgano es responsable de filtrar la sangre?", respuesta: "Riñón", dificultad: "facil" },
+{ pregunta: "¿Qué planeta tiene un sistema de anillos?", respuesta: "Saturno", dificultad: "facil" },
+{ pregunta: "¿Cómo se llama la fuerza que nos mantiene en el suelo?", respuesta: "Gravedad", dificultad: "facil" },
+{ pregunta: "¿Qué metal se encuentra en el centro de la Tierra?", respuesta: "Hierro", dificultad: "dificil" },
+{ pregunta: "¿Qué parte del ojo regula la entrada de luz?", respuesta: "La pupila", dificultad: "facil" },
+{ pregunta: "¿Qué instrumento se usa para medir la temperatura?", respuesta: "Termómetro", dificultad: "facil" },
+{ pregunta: "¿Qué animales son conocidos por su metamorfosis completa?", respuesta: "Las mariposas", dificultad: "facil" },
+{ pregunta: "¿Qué enfermedad afectó al mundo en 2020?", respuesta: "COVID-19", dificultad: "facil" },
+{ pregunta: "¿Qué órgano produce insulina?", respuesta: "El páncreas", dificultad: "dificil" },
+{ pregunta: "¿Cuál es el planeta más cercano al Sol?", respuesta: "Mercurio", dificultad: "facil" },
+{ pregunta: "¿Qué sistema corporal controla los movimientos voluntarios?", respuesta: "Sistema nervioso", dificultad: "dificil" },
+{ pregunta: "¿Qué gas es el más abundante en la atmósfera?", respuesta: "Nitrógeno", dificultad: "facil" },
+{ pregunta: "¿Qué parte de la planta absorbe nutrientes del suelo?", respuesta: "Las raíces", dificultad: "facil" },
+{ pregunta: "¿Qué animales pertenecen al grupo de los anfibios?", respuesta: "Ranas, sapos y salamandras", dificultad: "facil" },
+{ pregunta: "¿Qué órgano permite respirar a los humanos?", respuesta: "Pulmones", dificultad: "facil" },
+{ pregunta: "¿Qué tipo de célula no tiene núcleo definido?", respuesta: "Procariota", dificultad: "dificil" },
+{ pregunta: "¿Qué tipo de sangre es el donante universal?", respuesta: "O negativo", dificultad: "dificil" },
+{ pregunta: "¿Qué astro da luz y calor a la Tierra?", respuesta: "El Sol", dificultad: "facil" },
+{ pregunta: "¿Cómo se llama la ciencia que estudia los seres vivos?", respuesta: "Biología", dificultad: "facil" },
+{ pregunta: "¿Qué vitamina se obtiene del sol?", respuesta: "Vitamina D", dificultad: "facil" },
+{ pregunta: "¿Qué animal puede regenerar sus extremidades?", respuesta: "La estrella de mar", dificultad: "dificil" },
+{ pregunta: "¿Qué fenómeno meteorológico produce rayos y truenos?", respuesta: "Tormenta eléctrica", dificultad: "facil" },
+{ pregunta: "¿Qué planeta es el más grande del sistema solar?", respuesta: "Júpiter", dificultad: "facil" },
+{ pregunta: "¿Qué unidad se usa para medir la intensidad eléctrica?", respuesta: "Amperio", dificultad: "dificil" },
+{ pregunta: "¿Qué nombre recibe el ADN en las células?", respuesta: "Material genético", dificultad: "dificil" },
+{ pregunta: "¿Qué órgano conecta la boca con el estómago?", respuesta: "Esófago", dificultad: "facil" },
+{ pregunta: "¿Cómo se llama el estudio de los fósiles?", respuesta: "Paleontología", dificultad: "dificil" },
+{ pregunta: "¿Qué parte del cuerpo produce glóbulos rojos?", respuesta: "Médula ósea", dificultad: "dificil" },
+{ pregunta: "¿Qué órgano es responsable de la digestión química?", respuesta: "El estómago", dificultad: "facil" },
+{ pregunta: "¿Qué nombre recibe el agua en estado gaseoso?", respuesta: "Vapor", dificultad: "facil" },
+{ pregunta: "¿Qué fenómeno hace que los objetos floten en el agua?", respuesta: "Empuje o flotación", dificultad: "facil" },
+{ pregunta: "¿Cuál es el único satélite natural de la Tierra?", respuesta: "La Luna", dificultad: "facil" },
+{ pregunta: "¿Qué aparato se usa para ver objetos muy pequeños?", respuesta: "Microscopio", dificultad: "facil" },
+{ pregunta: "¿Qué animal es el más rápido del mundo?", respuesta: "El halcón peregrino", dificultad: "dificil" },
+{ pregunta: "¿Qué proceso permite que el hielo se convierta en agua?", respuesta: "Fusión", dificultad: "facil" },
+{ pregunta: "¿Qué líquido del cuerpo transporta oxígeno?", respuesta: "La sangre", dificultad: "facil" },
+{ pregunta: "¿Qué es un eclipse?", respuesta: "La ocultación de un cuerpo celeste por otro", dificultad: "facil" },
+{ pregunta: "¿Qué parte del cerebro controla el equilibrio?", respuesta: "El cerebelo", dificultad: "dificil" },
+{ pregunta: "¿Qué planeta tiene un día más largo que su año?", respuesta: "Venus", dificultad: "dificil" },
+{ pregunta: "¿Qué ciencia estudia los planetas y estrellas?", respuesta: "Astronomía", dificultad: "facil" },
+{ pregunta: "¿Qué órgano produce bilis?", respuesta: "El hígado", dificultad: "facil" },
+
+      ],
+      beige: [
+{ pregunta: "¿Cuál es el verdadero nombre de Mark Twain?", respuesta: "Samuel Langhorne Clemens", dificultad: "dificil" },
+{ pregunta: "¿Qué novela comienza con 'En un lugar de la Mancha'?", respuesta: "Don Quijote de la Mancha", dificultad: "facil" },
+{ pregunta: "¿Qué es un haiku?", respuesta: "Un poema japonés corto", dificultad: "facil" },
+{ pregunta: "¿Quién escribió La Divina Comedia?", respuesta: "Dante Alighieri", dificultad: "dificil" },
+{ pregunta: "¿Qué movimiento artístico fundó Salvador Dalí?", respuesta: "Surrealismo", dificultad: "dificil" },
+{ pregunta: "¿Qué autor escribió Crimen y castigo?", respuesta: "Fiódor Dostoyevski", dificultad: "dificil" },
+{ pregunta: "¿Quién escribió Cien años de soledad?", respuesta: "Gabriel García Márquez", dificultad: "dificil" },
+{ pregunta: "¿Qué pintor es conocido por cortarse una oreja?", respuesta: "Vincent van Gogh", dificultad: "dificil" },
+{ pregunta: "¿Quién escribió Don Quijote de la Mancha?", respuesta: "Miguel de Cervantes", dificultad: "facil" },
+{ pregunta: "¿Qué escritor británico creó al personaje de Harry Potter?", respuesta: "J.K. Rowling", dificultad: "facil" },
+{ pregunta: "¿En qué país nació Pablo Picasso?", respuesta: "España", dificultad: "facil" },
+{ pregunta: "¿Cuál es la obra más famosa de Leonardo da Vinci?", respuesta: "La Mona Lisa", dificultad: "dificil" },
+{ pregunta: "¿Qué autor escribió Romeo y Julieta?", respuesta: "William Shakespeare", dificultad: "facil" },
+{ pregunta: "¿Qué poeta chileno ganó el Nobel en 1971?", respuesta: "Pablo Neruda", dificultad: "dificil" },
+{ pregunta: "¿Quién pintó el techo de la Capilla Sixtina?", respuesta: "Miguel Ángel", dificultad: "dificil" },
+{ pregunta: "¿Qué pintor español es famoso por sus obras cubistas?", respuesta: "Pablo Picasso", dificultad: "dificil" },
+{ pregunta: "¿Quién escribió El principito?", respuesta: "Antoine de Saint-Exupéry", dificultad: "facil" },
+{ pregunta: "¿Qué escritor argentino es autor de Ficciones?", respuesta: "Jorge Luis Borges", dificultad: "dificil" },
+{ pregunta: "¿Qué autor escribió 1984 y Rebelión en la granja?", respuesta: "George Orwell", dificultad: "dificil" },
+{ pregunta: "¿Qué artista pintó La noche estrellada?", respuesta: "Vincent van Gogh", dificultad: "dificil" },
+{ pregunta: "¿Quién escribió Rayuela?", respuesta: "Julio Cortázar", dificultad: "dificil" },
+{ pregunta: "¿Qué obra escribió Homero además de La Ilíada?", respuesta: "La Odisea", dificultad: "dificil" },
+{ pregunta: "¿Qué escritor noruego escribió Casa de muñecas?", respuesta: "Henrik Ibsen", dificultad: "dificil" },
+{ pregunta: "¿Qué es un soneto?", respuesta: "Un poema de 14 versos", dificultad: "facil" },
+{ pregunta: "¿Quién escribió El amor en los tiempos del cólera?", respuesta: "Gabriel García Márquez", dificultad: "dificil" },
+{ pregunta: "¿Quién es el autor de Pedro Páramo?", respuesta: "Juan Rulfo", dificultad: "dificil" },
+{ pregunta: "¿Qué famoso pintor usó el método del puntillismo?", respuesta: "Georges Seurat", dificultad: "dificil" },
+{ pregunta: "¿Qué dramaturgo español escribió La vida es sueño?", respuesta: "Calderón de la Barca", dificultad: "dificil" },
+{ pregunta: "¿Qué poeta escribió Alturas de Macchu Picchu?", respuesta: "Pablo Neruda", dificultad: "dificil" },
+{ pregunta: "¿Qué escritora mexicana ganó el Premio Cervantes en 2013?", respuesta: "Elena Poniatowska", dificultad: "dificil" },
+{ pregunta: "¿Qué novela de Mary Shelley es considerada la primera de ciencia ficción?", respuesta: "Frankenstein", dificultad: "dificil" },
+{ pregunta: "¿Qué escultor renacentista creó El David?", respuesta: "Miguel Ángel", dificultad: "dificil" },
+{ pregunta: "¿Qué poeta escribió Campos de Castilla?", respuesta: "Antonio Machado", dificultad: "dificil" },
+{ pregunta: "¿Quién pintó El Guernica?", respuesta: "Pablo Picasso", dificultad: "dificil" },
+{ pregunta: "¿Qué obra literaria trata del capitán Ahab y una ballena?", respuesta: "Moby Dick", dificultad: "dificil" },
+{ pregunta: "¿Qué autor escribió La Metamorfosis?", respuesta: "Franz Kafka", dificultad: "dificil" },
+{ pregunta: "¿Qué escritor ruso es autor de Ana Karenina?", respuesta: "León Tolstói", dificultad: "dificil" },
+{ pregunta: "¿Qué corriente artística prioriza la expresión emocional?", respuesta: "Expresionismo", dificultad: "dificil" },
+{ pregunta: "¿Qué pintor español es famoso por sus pinturas negras?", respuesta: "Francisco de Goya", dificultad: "dificil" },
+{ pregunta: "¿Quién escribió Los miserables?", respuesta: "Victor Hugo", dificultad: "dificil" },
+{ pregunta: "¿Qué poeta escribió Rimas y leyendas?", respuesta: "Gustavo Adolfo Bécquer", dificultad: "dificil" },
+{ pregunta: "¿Qué escritor escribió El túnel?", respuesta: "Ernesto Sabato", dificultad: "dificil" },
+{ pregunta: "¿Qué autor creó a Sherlock Holmes?", respuesta: "Arthur Conan Doyle", dificultad: "facil" },
+{ pregunta: "¿Qué poeta escribió Oda a la alegría?", respuesta: "Friedrich Schiller", dificultad: "dificil" },
+{ pregunta: "¿Qué autora escribió Orgullo y prejuicio?", respuesta: "Jane Austen", dificultad: "dificil" },
+{ pregunta: "¿Qué corriente artística pintó Monet?", respuesta: "Impresionismo", dificultad: "dificil" },
+{ pregunta: "¿Qué autor escribió Fahrenheit 451?", respuesta: "Ray Bradbury", dificultad: "dificil" },
+{ pregunta: "¿Qué escritor colombiano escribió El coronel no tiene quien le escriba?", respuesta: "Gabriel García Márquez", dificultad: "dificil" },
+{ pregunta: "¿Qué libro tiene como personaje principal a Gregorio Samsa?", respuesta: "La Metamorfosis", dificultad: "dificil" },
+{ pregunta: "¿Qué pintor mexicano es conocido por su estilo muralista?", respuesta: "Diego Rivera", dificultad: "dificil" },
+
+
+      ],
+      azul: [
+{ pregunta: "¿En qué año se celebraron los primeros Juegos Olímpicos modernos?", respuesta: "1896", dificultad: "facil" },
+{ pregunta: "¿Cuál es el país con más Copas del Mundo de fútbol ganadas?", respuesta: "Brasil", dificultad: "facil" },
+{ pregunta: "¿Qué tenista ha ganado más títulos de Grand Slam?", respuesta: "Novak Djokovic", dificultad: "dificil" },
+{ pregunta: "¿Qué futbolista es conocido como 'La Pulga'?", respuesta: "Lionel Messi", dificultad: "facil" },
+{ pregunta: "¿En qué deporte se usa una tabla y una vela?", respuesta: "Windsurf", dificultad: "facil" },
+{ pregunta: "¿Qué selección ganó el Mundial de Fútbol en 2018?", respuesta: "Francia", dificultad: "facil" },
+{ pregunta: "¿Qué país ha ganado más medallas olímpicas en total?", respuesta: "Estados Unidos", dificultad: "facil" },
+{ pregunta: "¿Cuál es el deporte principal en India?", respuesta: "Críquet", dificultad: "facil" },
+{ pregunta: "¿Quién es el máximo goleador histórico de la Champions League?", respuesta: "Cristiano Ronaldo", dificultad: "facil" },
+{ pregunta: "¿En qué país se celebraron los Juegos Olímpicos de 2020?", respuesta: "Japón", dificultad: "facil" },
+{ pregunta: "¿Cuántos jugadores hay en un equipo de voleibol en cancha?", respuesta: "6", dificultad: "facil" },
+{ pregunta: "¿Qué ciclista ganó 7 Tours de Francia consecutivos?", respuesta: "Lance Armstrong (títulos luego retirados)", dificultad: "dificil" },
+{ pregunta: "¿Cuál es el equipo con más títulos en la NBA?", respuesta: "Boston Celtics", dificultad: "facil" },
+{ pregunta: "¿Qué deportista es apodado 'Bolt'?", respuesta: "Usain Bolt", dificultad: "facil" },
+{ pregunta: "¿Qué boxeador fue conocido como 'The Greatest'?", respuesta: "Muhammad Ali", dificultad: "facil" },
+{ pregunta: "¿En qué deporte se destacan los All Blacks?", respuesta: "Rugby", dificultad: "facil" },
+{ pregunta: "¿Cuántos sets se juegan en un partido de tenis masculino de Grand Slam?", respuesta: "5", dificultad: "facil" },
+{ pregunta: "¿Cuál es el país con más títulos en la Copa Davis?", respuesta: "Estados Unidos", dificultad: "facil" },
+{ pregunta: "¿Qué piloto de Fórmula 1 tiene más campeonatos mundiales?", respuesta: "Lewis Hamilton (empatado con Schumacher)", dificultad: "dificil" },
+{ pregunta: "¿Quién fue el primer campeón mundial de ajedrez?", respuesta: "Wilhelm Steinitz", dificultad: "dificil" },
+{ pregunta: "¿Qué futbolista argentino ganó el Balón de Oro en 2023?", respuesta: "Lionel Messi", dificultad: "facil" },
+{ pregunta: "¿En qué país se originó el judo?", respuesta: "Japón", dificultad: "facil" },
+{ pregunta: "¿Cuál es el récord mundial actual en 100 metros planos?", respuesta: "9.58 segundos (Usain Bolt)", dificultad: "facil" },
+{ pregunta: "¿Qué equipo ha ganado más Ligas de Campeones de Europa?", respuesta: "Real Madrid", dificultad: "facil" },
+{ pregunta: "¿Qué deporte se juega en el Super Bowl?", respuesta: "Fútbol americano", dificultad: "facil" },
+{ pregunta: "¿Quién fue el primer latinoamericano campeón mundial de Fórmula 1?", respuesta: "Juan Manuel Fangio", dificultad: "facil" },
+{ pregunta: "¿Qué país ganó el Mundial de Fútbol en 2006?", respuesta: "Italia", dificultad: "facil" },
+{ pregunta: "¿Cuál es el único país que ha participado en todos los Mundiales de fútbol?", respuesta: "Brasil", dificultad: "facil" },
+{ pregunta: "¿Qué nadador ha ganado más medallas olímpicas?", respuesta: "Michael Phelps", dificultad: "facil" },
+{ pregunta: "¿Cuál es el nombre del trofeo que se entrega en Wimbledon?", respuesta: "La copa dorada (Gentlemen’s Singles Trophy)", dificultad: "dificil" },
+{ pregunta: "¿En qué deporte se compite en el Tour de Francia?", respuesta: "Ciclismo", dificultad: "facil" },
+{ pregunta: "¿Cuántos jugadores hay en un equipo de baloncesto en cancha?", respuesta: "5", dificultad: "facil" },
+{ pregunta: "¿En qué país se celebraron los Juegos Olímpicos de 2012?", respuesta: "Reino Unido (Londres)", dificultad: "facil" },
+{ pregunta: "¿Qué país ganó la Eurocopa 2021?", respuesta: "Italia", dificultad: "facil" },
+{ pregunta: "¿Cuál es el nombre del estadio del FC Barcelona?", respuesta: "Spotify Camp Nou", dificultad: "facil" },
+{ pregunta: "¿Qué país tiene más medallas olímpicas en gimnasia artística?", respuesta: "Estados Unidos", dificultad: "facil" },
+{ pregunta: "¿Qué exfutbolista es conocido como 'O Rei'?", respuesta: "Pelé", dificultad: "facil" },
+{ pregunta: "¿Qué deporte se juega con un bate y una pelota dura en diamante?", respuesta: "Béisbol", dificultad: "facil" },
+{ pregunta: "¿Qué equipo de fútbol inglés es apodado 'The Reds'?", respuesta: "Liverpool", dificultad: "facil" },
+{ pregunta: "¿Cuántos minutos dura un partido de fútbol profesional?", respuesta: "90 minutos", dificultad: "facil" },
+{ pregunta: "¿Qué atleta ganó 4 oros en los JJ.OO. de Berlín 1936?", respuesta: "Jesse Owens", dificultad: "dificil" },
+{ pregunta: "¿Qué jugador ganó más títulos de Roland Garros?", respuesta: "Rafael Nadal", dificultad: "facil" },
+{ pregunta: "¿En qué país nació Diego Maradona?", respuesta: "Argentina", dificultad: "facil" },
+{ pregunta: "¿Qué país ganó el Mundial de Rugby 2023?", respuesta: "Sudáfrica", dificultad: "facil" },
+{ pregunta: "¿En qué deporte se destacan Novak Djokovic y Rafael Nadal?", respuesta: "Tenis", dificultad: "facil" },
+{ pregunta: "¿Qué ciudad fue sede de los JJ.OO. de 1992?", respuesta: "Barcelona", dificultad: "facil" },
+{ pregunta: "¿Qué selección ganó el Mundial de 2014?", respuesta: "Alemania", dificultad: "facil" },
+{ pregunta: "¿Qué jugadora de tenis ha ganado más Grand Slams femeninos?", respuesta: "Serena Williams", dificultad: "facil" },
+{ pregunta: "¿Qué corredor español ganó la Vuelta a España 2008?", respuesta: "Alberto Contador", dificultad: "facil" },
+
+
+      ],
+      rosa: [
+{ pregunta: "¿Qué banda británica lanzó el álbum 'Abbey Road'?", respuesta: "The Beatles", dificultad: "facil" },
+{ pregunta: "¿Quién interpretó a Jack en la película Titanic?", respuesta: "Leonardo DiCaprio", dificultad: "facil" },
+{ pregunta: "¿Qué película ganó el Oscar a Mejor Película en 2020?", respuesta: "Parásitos", dificultad: "dificil" },
+{ pregunta: "¿Quién es el creador de la serie animada 'Los Simpson'?", respuesta: "Matt Groening", dificultad: "facil" },
+{ pregunta: "¿Cuál es el superhéroe cuyo nombre real es Bruce Wayne?", respuesta: "Batman", dificultad: "facil" },
+{ pregunta: "¿Qué cantante es conocida como 'La Reina del Pop'?", respuesta: "Madonna", dificultad: "facil" },
+{ pregunta: "¿Qué saga cinematográfica tiene personajes como Frodo y Gandalf?", respuesta: "El Señor de los Anillos", dificultad: "facil" },
+{ pregunta: "¿Quién protagonizó la serie de televisión 'Breaking Bad' como Walter White?", respuesta: "Bryan Cranston", dificultad: "dificil" },
+{ pregunta: "¿Qué película de Disney tiene una princesa llamada Elsa?", respuesta: "Frozen", dificultad: "facil" },
+{ pregunta: "¿En qué año se estrenó la primera película de Harry Potter?", respuesta: "2001", dificultad: "facil" },
+{ pregunta: "¿Qué actor interpretó a Tony Stark en el Universo Cinematográfico de Marvel?", respuesta: "Robert Downey Jr.", dificultad: "facil" },
+{ pregunta: "¿Quién cantó 'Thriller'?", respuesta: "Michael Jackson", dificultad: "facil" },
+{ pregunta: "¿Qué personaje de Marvel empuña un martillo llamado Mjolnir?", respuesta: "Thor", dificultad: "facil" },
+{ pregunta: "¿Quién es el director de cine de 'Titanic', 'Avatar' y 'Terminator'?", respuesta: "James Cameron", dificultad: "facil" },
+{ pregunta: "¿Qué serie gira en torno a un trono y casas nobles como Stark y Lannister?", respuesta: "Game of Thrones", dificultad: "facil" },
+{ pregunta: "¿Cuál es la plataforma de streaming que lanzó 'Stranger Things'?", respuesta: "Netflix", dificultad: "facil" },
+{ pregunta: "¿Qué actor interpretó a Joker en 'The Dark Knight'?", respuesta: "Heath Ledger", dificultad: "facil" },
+{ pregunta: "¿Qué cantante es conocida por el álbum '1989'?", respuesta: "Taylor Swift", dificultad: "facil" },
+{ pregunta: "¿Qué película animada presenta a un vaquero llamado Woody?", respuesta: "Toy Story", dificultad: "facil" },
+{ pregunta: "¿Qué saga de películas se desarrolla en una galaxia muy, muy lejana?", respuesta: "Star Wars", dificultad: "facil" },
+{ pregunta: "¿Quién ganó el Latin Grammy a Álbum del Año en 2023?", respuesta: "Shakira", dificultad: "dificil" },
+{ pregunta: "¿Qué cantante colombiano interpreta 'Felices los 4'?", respuesta: "Maluma", dificultad: "facil" },
+{ pregunta: "¿En qué país nació la cantante Rosalía?", respuesta: "España", dificultad: "facil" },
+{ pregunta: "¿Cuál es el verdadero nombre de Bad Bunny?", respuesta: "Benito Antonio Martínez Ocasio", dificultad: "dificil" },
+{ pregunta: "¿Qué serie animada presenta a un niño con una piedra verde mágica llamada Omnitrix?", respuesta: "Ben 10", dificultad: "facil" },
+{ pregunta: "¿Qué actor interpreta a Spider-Man en el MCU desde 2016?", respuesta: "Tom Holland", dificultad: "facil" },
+{ pregunta: "¿Qué serie cuenta la historia de un ajedrecista llamado Beth Harmon?", respuesta: "Gambito de dama", dificultad: "dificil" },
+{ pregunta: "¿Qué película cuenta la historia de una muñeca Barbie en el mundo real?", respuesta: "Barbie (2023)", dificultad: "facil" },
+{ pregunta: "¿Quién interpreta a Wednesday Addams en la serie de Netflix de 2022?", respuesta: "Jenna Ortega", dificultad: "facil" },
+{ pregunta: "¿Qué personaje tiene un amigo llamado Patrick y vive en una piña?", respuesta: "Bob Esponja", dificultad: "facil" },
+{ pregunta: "¿Cuál es el apellido de los hermanos protagonistas de 'Supernatural'?", respuesta: "Winchester", dificultad: "dificil" },
+{ pregunta: "¿Qué banda lanzó la canción 'Bohemian Rhapsody'?", respuesta: "Queen", dificultad: "facil" },
+{ pregunta: "¿Qué película es famosa por la frase 'Say hello to my little friend'?", respuesta: "Scarface", dificultad: "dificil" },
+{ pregunta: "¿Qué actor es conocido por sus papeles en 'El Padrino' y 'Scarface'?", respuesta: "Al Pacino", dificultad: "dificil" },
+{ pregunta: "¿Qué cantante lanzó el álbum 'Future Nostalgia'?", respuesta: "Dua Lipa", dificultad: "facil" },
+{ pregunta: "¿Qué director es conocido por películas como 'Pulp Fiction' y 'Kill Bill'?", respuesta: "Quentin Tarantino", dificultad: "dificil" },
+{ pregunta: "¿Qué famosa serie coreana ganó popularidad mundial en 2021?", respuesta: "El juego del calamar", dificultad: "facil" },
+{ pregunta: "¿Quién interpreta a Deadpool en las películas?", respuesta: "Ryan Reynolds", dificultad: "facil" },
+{ pregunta: "¿Qué actor es conocido por interpretar a Wolverine?", respuesta: "Hugh Jackman", dificultad: "facil" },
+{ pregunta: "¿Qué comediante protagoniza la película 'Click'?", respuesta: "Adam Sandler", dificultad: "facil" },
+{ pregunta: "¿Qué saga de películas tiene a Katniss Everdeen como protagonista?", respuesta: "Los Juegos del Hambre", dificultad: "facil" },
+{ pregunta: "¿Qué actriz interpreta a Harley Quinn en el DCEU?", respuesta: "Margot Robbie", dificultad: "facil" },
+{ pregunta: "¿En qué serie aparece un grupo llamado 'Los Padrinos Mágicos'?", respuesta: "Los Padrinos Mágicos", dificultad: "facil" },
+{ pregunta: "¿Qué película se basa en la vida de Freddie Mercury?", respuesta: "Bohemian Rhapsody", dificultad: "facil" },
+{ pregunta: "¿Qué actor interpreta a John Wick?", respuesta: "Keanu Reeves", dificultad: "facil" },
+{ pregunta: "¿Qué personaje dice 'Hakuna Matata' en El Rey León?", respuesta: "Timon y Pumba", dificultad: "facil" },
+{ pregunta: "¿Qué grupo musical interpreta la canción 'Dynamite'?", respuesta: "BTS", dificultad: "facil" },
+{ pregunta: "¿Qué cantante mexicana es conocida por 'Amor Prohibido' y 'Como la Flor'?", respuesta: "Selena Quintanilla", dificultad: "facil" }
+
+
+      ]
+    };
+
+    // Para guardar el orden de preguntas aleatorias por categoría
+    const ordenPreguntas = {};
+    const indicePregunta = {};
+    let preguntaActual = null;
+    let categoriaActual = null;
+
+    // Puntos según dificultad
+    const puntosPorDificultad = {
+      facil: 10,
+      dificil: 20
+    };
+
+    // Función para mezclar arrays (Fisher-Yates)
+    function mezclar(array) {
+      let currentIndex = array.length, randomIndex;
+
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+      }
+
+      return array;
+    }
+
+    // Inicializar orden de preguntas aleatorias
+    for (let cat in preguntas) {
+      ordenPreguntas[cat] = mezclar([...Array(preguntas[cat].length).keys()]);
+      indicePregunta[cat] = 0;
+    }
+
+    function mostrarPregunta(cat) {
+      categoriaActual = cat;
+
+      if (indicePregunta[cat] >= preguntas[cat].length) {
+        document.getElementById('pregunta').textContent = "Ya no hay más preguntas en esta categoría.";
+        document.getElementById('respuesta').textContent = "";
+        document.getElementById('confirmacion-puntos').style.display = "none";
+        document.getElementById('mensaje-puntos').textContent = "";
+        document.getElementById('mostrar-respuesta').style.display = "none";
+        preguntaActual = null; // No hay pregunta actual
+        return;
+      }
+
+      const idx = ordenPreguntas[cat][indicePregunta[cat]];
+      preguntaActual = preguntas[cat][idx];
+
+      document.getElementById('pregunta').textContent = preguntaActual.pregunta;
+      document.getElementById('respuesta').textContent = "";
+      document.getElementById('confirmacion-puntos').style.display = "none";
+      document.getElementById('mensaje-puntos').textContent = "";
+      document.getElementById('mostrar-respuesta').style.display = "inline-block";
+
+      // Mostrar botones Sí / No cada vez que se carga pregunta
+      const contenedor = document.getElementById('confirmacion-puntos');
+      const botones = contenedor.querySelectorAll('button');
+      botones.forEach(b => b.style.display = 'inline-block');
+
+      indicePregunta[cat]++;
+    }
+
+    function mostrarRespuesta() {
+      if (!preguntaActual) return;
+
+      document.getElementById('respuesta').textContent = preguntaActual.respuesta;
+      document.getElementById('mostrar-respuesta').style.display = "none";
+      document.getElementById('confirmacion-puntos').style.display = "block";
+      document.getElementById('mensaje-puntos').textContent = "";
+
+      // Asegurar que botones estén visibles al mostrar respuesta
+      const contenedor = document.getElementById('confirmacion-puntos');
+      const botones = contenedor.querySelectorAll('button');
+      botones.forEach(b => b.style.display = 'inline-block');
+    }
+
+    function respuestaUsuario(acertado) {
+      if (!preguntaActual) return;
+
+      const mensaje = document.getElementById('mensaje-puntos');
+      const botones = document.querySelectorAll('#confirmacion-puntos button');
+
+      // Ocultar botones después de responder para evitar doble click
+      botones.forEach(b => b.style.display = 'none');
+
+      if (acertado) {
+        const puntos = puntosPorDificultad[preguntaActual.dificultad] || 0;
+        mensaje.style.color = '#1b5e20'; // verde
+        mensaje.textContent = `¡Genial!!!! Ganas ${puntos} puntos 🎉`;
+      } else {
+        mensaje.style.color = '#b71c1c'; // rojo
+        mensaje.textContent = 'Te toca tarjeta de reto ;(';
+      }
+    }
+
+    // Modal bienvenida
+    function abrirModal() {
+      document.getElementById('modal-ayuda').style.display = 'block';
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal-ayuda').style.display = 'none';
+    }
+
+    function cerrarBienvenida() {
+      document.getElementById('modal-bienvenida').style.display = 'none';
+    }
+
+    // Mostrar modal bienvenida al cargar la página
+    window.onload = function() {
+      document.getElementById('modal-bienvenida').style.display = 'block';
+    };
+  </script>
+</body>
+</html>
