@@ -290,6 +290,7 @@
     © 2025 Quizmania - Todos los derechos reservados para el grupo 4
   </footer>
   <button id="btn-ayuda" onclick="abrirModal()">❓ Ayuda</button>
+
   <div id="modal-bienvenida" class="modal">
     <div class="modal-contenido">
       <button class="cerrar" onclick="cerrarBienvenida()">×</button>
@@ -312,21 +313,20 @@
         cursor: pointer;
         user-select: none;
         transition: background 0.3s ease;
-      " 
-      onmouseover="this.style.background='linear-gradient(135deg, #9c27b0, #ce93d8)';" 
+      "
+      onmouseover="this.style.background='linear-gradient(135deg, #9c27b0, #ce93d8)';"
       onmouseout="this.style.background='linear-gradient(135deg, #7b1fa2, #ab47bc)';">
         Comenzar a jugar
       </button>
     </div>
   </div>
-  
-  <!-- Nueva ventana modal para fin de preguntas -->
+
   <div id="modal-no-mas-preguntas" class="modal" style="display:none;">
-    <div class="modal-contenido">
+    <div class="modal-contenido" tabindex="0">
       <button class="cerrar" onclick="cerrarNoMasPreguntas()">×</button>
       <div style="font-size: 48px; margin-bottom: 12px;">❗</div>
       <h2 style="color:#7b1fa2; margin-bottom: 20px;">¡Fin del juego!</h2>
-      <p style="font-size: 18px; font-weight: 700; color:#4a148c; line-height: 1.5; margin-bottom: 24px;">
+      <p id="texto-fin-juego" style="font-size: 18px; font-weight: 700; color:#4a148c; line-height: 1.5; margin-bottom: 24px;">
         Ya no hay más preguntas disponibles en esta categoría.<br>
         El juego termina de inmediato.<br>
         ¡Gracias por jugar!
@@ -558,16 +558,6 @@
       correcta: "c"
     },
     {
-      pregunta: "Según Yusef Hassan Montero, ¿en qué se basa un test con usuarios?",
-      opciones: [
-        "a) En entrevistas profundas con expertos",
-        "b) En la observación y análisis del uso real del sitio por parte de los usuarios",
-        "c) En encuestas masivas por internet",
-        "d) En la comparación con otros sitios web"
-      ],
-      correcta: "b"
-    },
-    {
       pregunta: "¿Cuál de las siguientes afirmaciones describe mejor una prueba de usabilidad?",
       opciones: [
         "a) Es una encuesta de satisfacción al cliente",
@@ -704,32 +694,77 @@
     let categoriaActual = null;
     let opcionSeleccionada = null;
     let puntuacionTotal = 0;
-    let preguntasMostradas = [];
+
+    // Para manejar las preguntas barajadas y el índice actual
+    let preguntasBarajadas = [];
+    let indicePreguntaActual = 0;
+
+    let timerInterval = null;
+    let tiempoRestante = 30;
+    let tiempoAcabado = false;
+
+    const ticTacAudio = new Audio('audio/popis.m4a');
+
+    // Función para barajar array (Fisher-Yates)
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function stopTemporizadorYAudio() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      ticTacAudio.pause();
+      ticTacAudio.currentTime = 0;
+      const temp = document.getElementById('temporizador');
+      if (temp) temp.style.display = 'none';
+    }
+
+    function mostrarFinJuego() {
+      stopTemporizadorYAudio();
+      const modal = document.getElementById('modal-no-mas-preguntas');
+      modal.style.display = 'flex';
+
+      const textoFin = document.getElementById('texto-fin-juego').innerText;
+      narrarTexto(textoFin, false);
+    }
 
     function mostrarPregunta(cat) {
-      categoriaActual = cat;
-      const preguntasCat = preguntas[cat];
-      if (preguntasMostradas.length === preguntasCat.length) {
-        document.getElementById('pregunta').textContent = "Ya no hay más preguntas en esta categoría";
-        document.getElementById('opciones').innerHTML = "";
-        document.getElementById('respuesta').textContent = "";
-        document.getElementById('confirmacion-puntos').style.display = "none";
-        // Mostrar ventana modal llamativa en vez de alert
-        document.getElementById('modal-no-mas-preguntas').style.display = 'flex';
+      stopTemporizadorYAudio();
+
+      // Si categoría cambió o estamos comenzando, barajar preguntas
+      if (categoriaActual !== cat || preguntasBarajadas.length === 0) {
+        categoriaActual = cat;
+        preguntasBarajadas = shuffleArray([...preguntas[cat]]);
+        indicePreguntaActual = 0;
+      }
+
+      if (indicePreguntaActual >= preguntasBarajadas.length) {
+        mostrarFinJuego();
         return;
       }
-      let idx;
-      do { idx = Math.floor(Math.random() * preguntasCat.length); }
-      while (preguntasMostradas.includes(idx));
-      preguntasMostradas.push(idx);
-      preguntaActual = preguntasCat[idx];
+
+      preguntaActual = preguntasBarajadas[indicePreguntaActual];
+      indicePreguntaActual++;
+
       document.getElementById('pregunta').textContent = preguntaActual.pregunta;
       mostrarOpciones(preguntaActual.opciones);
       document.getElementById('respuesta').textContent = "";
       document.getElementById('confirmacion-puntos').style.display = "none";
       document.getElementById('mensaje-puntos').textContent = "";
       opcionSeleccionada = null;
-      narrarTexto(preguntaActual.pregunta);
+      tiempoAcabado = false;
+      bloquearOpciones(false);
+
+      const temp = document.getElementById('temporizador');
+      if (temp) temp.style.display = 'none';
+
+      narrarTexto(preguntaActual.pregunta, true);
     }
 
     function mostrarOpciones(opciones) {
@@ -758,6 +793,9 @@
 
     function mostrarRespuestaInstantanea() {
       if (!preguntaActual || !opcionSeleccionada) return;
+
+      stopTemporizadorYAudio();
+
       const esCorrecta = (opcionSeleccionada === preguntaActual.correcta);
       const respuestaTexto = esCorrecta
         ? `¡Respuesta correcta! Es ${preguntaActual.opciones.find(op => op.charAt(0) === preguntaActual.correcta).slice(3)}.`
@@ -765,8 +803,9 @@
       document.getElementById('respuesta').textContent = respuestaTexto;
       document.getElementById('confirmacion-puntos').style.display = "block";
       document.getElementById('mensaje-puntos').textContent = "";
-      narrarTexto(respuestaTexto);
+      narrarTexto(respuestaTexto, false);
       respuestaUsuario(esCorrecta);
+      bloquearOpciones(true);
     }
 
     function respuestaUsuario(acertado) {
@@ -777,13 +816,89 @@
         mensaje.style.color = '#1b5e20';
         const texto = `¡Genial! Has ganado 100 puntos. Puntaje total: ${puntuacionTotal} puntos.`;
         mensaje.textContent = texto;
-        narrarTexto(texto);
+        narrarTexto(texto, false);
       } else {
         puntuacionTotal -= 50;
         mensaje.style.color = '#b71c1c';
         const texto = `Oh no, perdiste 50 puntos. Puntaje total: ${puntuacionTotal} puntos.`;
         mensaje.textContent = texto;
-        narrarTexto(texto);
+        narrarTexto(texto, false);
+      }
+    }
+
+    function bloquearOpciones(bloquear) {
+      const radios = document.querySelectorAll('#opciones input[type="radio"]');
+      radios.forEach(radio => {
+        radio.disabled = bloquear;
+      });
+    }
+
+    function narrarTexto(texto, esPregunta = false) {
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(texto);
+        utterance.lang = 'es-ES';
+        utterance.onend = () => {
+          if (preguntaActual && esPregunta && !tiempoAcabado) {
+            iniciarTemporizador();
+          }
+        };
+        speechSynthesis.speak(utterance);
+      } else {
+        if (esPregunta) {
+          iniciarTemporizador();
+        }
+      }
+    }
+
+    function iniciarTemporizador() {
+      stopTemporizadorYAudio();
+
+      tiempoRestante = 30;
+      tiempoAcabado = false;
+      let contenedorTemporizador = document.getElementById('temporizador');
+      if (!contenedorTemporizador) {
+        contenedorTemporizador = document.createElement('div');
+        contenedorTemporizador.id = 'temporizador';
+        contenedorTemporizador.style.fontSize = '20px';
+        contenedorTemporizador.style.color = '#b71c1c';
+        contenedorTemporizador.style.marginTop = '10px';
+        contenedorTemporizador.style.fontWeight = '700';
+        contenedorTemporizador.style.userSelect = 'none';
+        const preguntaDiv = document.getElementById('pregunta');
+        preguntaDiv.appendChild(contenedorTemporizador);
+      }
+      contenedorTemporizador.style.display = 'block';
+      contenedorTemporizador.textContent = `${tiempoRestante} segundos para responder`;
+
+      timerInterval = setInterval(() => {
+        if (tiempoRestante > 0) {
+          tiempoRestante--;
+          contenedorTemporizador.textContent = `${tiempoRestante} segundos para responder`;
+
+          if (ticTacAudio.paused) {
+            ticTacAudio.currentTime = 0;
+            ticTacAudio.play().catch(e => {});
+          }
+        } else {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          contenedorTemporizador.textContent = "Tiempo agotado, pierdes 50 puntos.";
+          tiempoAcabado = true;
+          manejarTiempoAgotado();
+        }
+      }, 1000);
+    }
+
+    function manejarTiempoAgotado() {
+      if (preguntaActual && opcionSeleccionada === null) {
+        puntuacionTotal -= 50;
+        document.getElementById('mensaje-puntos').style.color = '#b71c1c';
+        const texto = `Oh no, perdiste 50 puntos. Puntaje total: ${puntuacionTotal} puntos.`;
+        document.getElementById('mensaje-puntos').textContent = texto;
+        document.getElementById('confirmacion-puntos').style.display = "block";
+        narrarTexto(texto, false);
+        bloquearOpciones(true);
       }
     }
 
@@ -802,15 +917,6 @@
 
     function cerrarNoMasPreguntas() {
       document.getElementById('modal-no-mas-preguntas').style.display = 'none';
-    }
-
-    function narrarTexto(texto) {
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(texto);
-        utterance.lang = 'es-ES';
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
-      }
     }
 
     window.onload = function() {
