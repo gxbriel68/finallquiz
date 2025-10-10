@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quizmania</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    /* Tu CSS intacto */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial Black', Arial, sans-serif;
+      position: relative;
+      min-height: 100vh;
+      text-align: center;
+      overflow-x: hidden;
+      user-select: none;
+      background-image: url('img/popo.png');
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      position: relative;
+      z-index: 0;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.35);
+      z-index: -1;
+    }
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 80px;
+      margin-top: 30px;
+      color: #7b1fa2;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      letter-spacing: 6px;
+      transform: skewX(-5deg);
+      animation: brillo-titulo 6s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes brillo-titulo {
+      0%, 100% { text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);}
+      50% {
+        text-shadow:
+          0 0 10px #fff,
+          0 0 15px #ffee58,
+          0 0 20px #fdd835;
+      }
+    }
+    .boton-categoria {
+      padding: 16px 28px;
+      font-size: 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
+      position: relative;
+      z-index: 1;
+      background-color: #7b1fa2 !important;
+    }
+    .boton-categoria:active {
+      transform: scale(0.96);
+    }
+    .boton-categoria:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      opacity: 0.95;
+    }
+    .boton-categoria:focus-visible {
+      outline: 2px solid #000;
+    }
+    .cafe { background-color: #6D4C41; }
+    .cuadro {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(230, 230, 255, 0.85));
+      border-radius: 30px;
+      padding: 30px 35px;
+      margin: 25px auto;
+      max-width: 800px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #2d1b4e;
+      box-shadow: 0 12px 30px rgba(114, 21, 142, 0.22);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      line-height: 1.4;
+      text-align: left;
+      position: relative;
+      z-index: 1;
+    }
+    .cuadro:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 18px 40px rgba(123, 31, 162, 0.35);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(240, 230, 255, 0.95));
+    }
+    #pregunta {
+      font-style: italic;
+      color: #5e3e96;
+    }
+    #respuesta {
+      font-style: normal;
+      color: #3a176f;
+      margin-top: 20px;
+    }
+    /* Botones de opciones selección múltiple */
+    .opcion {
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .opcion input[type="radio"] {
+      accent-color: #8e24aa;
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .opcion input[type="radio"]:hover {
+      transform: scale(1.2);
+    }
+    .opcion label {
+      font-size: 20px;
+      color: #4a148c;
+      font-weight: 700;
+      transition: color 0.3s ease;
+    }
+    .opcion:hover label {
+      color: #7b1fa2;
+    }
+    /* Botones sí/no confirmación */
+    #confirmacion-puntos {
+      margin-top: 20px;
+      background: #f3e5f5;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 6px 15px rgba(156, 39, 176, 0.4);
+      font-size: 18px;
+      font-weight: bold;
+      color: #4a148c;
+      display: none;
+      text-align: center;
+      white-space: pre-line;
+      position: relative;
+      z-index: 1;
+    }
+    #mensaje-puntos {
+      margin-top: 15px;
+      font-size: 20px;
+      color: #1b5e20;
+      text-shadow: 1px 1px 2px #c8e6c9;
+      position: relative;
+      z-index: 1;
+    }
+    footer {
+      font-size: 14px;
+      color: #666;
+      padding: 20px 0;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        animation: none;
+        font-size: 60px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      }
+      .boton-categoria,
+      #mostrar-respuesta {
+        transition: none;
+        box-shadow: none;
+      }
+      .cuadro {
+        box-shadow: none;
+        text-align: left;
+        padding: 20px 25px;
+        font-size: 20px;
+        max-width: 90%;
+        margin: 15px auto;
+      }
+    }
+    /* Nuevo estilo ventana bienvenida */
+    .modal {
+      display: flex;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(44,29,75,0.75);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-contenido {
+      background: white;
+      padding: 40px 35px 50px;
+      border-radius: 32px;
+      max-width: 420px;
+      width: 90vw;
+      box-shadow: 0 12px 40px rgba(123,31,162,0.25);
+      text-align: center;
+      position: relative;
+      user-select: none;
+      z-index: 1001;
+    }
+    .cerrar {
+      position: absolute;
+      top: 12px; right: 14px;
+      background: #ab47bc;
+      border-radius: 50%;
+      color: white;
+      font-size: 28px;
+      border: none;
+      width: 40px; height: 40px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(123,31,162,0.35);
+      transition: background 0.3s ease;
+      z-index: 1002;
+    }
+    .cerrar:hover {
+      background: #7b1fa2;
+    }
+    /* Botón Ayuda */
+    #btn-ayuda {
+      display: none;
+      background: linear-gradient(135deg, #7b1fa2, #ab47bc);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 12px 24px;
+      font-size: 18px;
+      font-weight: 900;
+      box-shadow: 0 6px 18px rgba(123, 31, 162, 0.7);
+      cursor: pointer;
+      user-select: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+      z-index: 1100;
+    }
+    #btn-ayuda:hover {
+      background: linear-gradient(135deg, #9c27b0, #ce93d8);
+      box-shadow: 0 8px 22px rgba(156, 39, 176, 1);
+      transform: scale(1.08);
+    }
+    #btn-ayuda:active {
+      transform: scale(0.95);
+    }
+    /* Modal Ayuda centrado con flexbox */
+    #modal-ayuda {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(44,29,75,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quiz</h1>
+  <div>
+    <button class="boton-categoria" style="background-color: #00796b;" onclick="mostrarPregunta('cafe')">Generar pregunta de la exposición</button>
+  </div>
+  <div id="pregunta" class="cuadro"></div>
+  <div id="opciones" class="cuadro"></div>
+  <div id="respuesta" class="cuadro"></div>
+  <div id="confirmacion-puntos">
+    <div id="mensaje-puntos"></div>
+  </div>
+  <footer>
+    © 2025 Quizmania - Todos los derechos reservados para el grupo 4 :D
+  </footer>
+  <button id="btn-ayuda" onclick="abrirModal()">❓ Ayuda</button>
+
+  <div id="modal-bienvenida" class="modal">
+    <div class="modal-contenido">
+      <button class="cerrar" onclick="cerrarBienvenida()">×</button>
+      <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+      <h2 style="color:#7b1fa2; margin-bottom: 20px;">¡Bienvenido a Quizmania!</h2>
+      <p style="font-size: 18px; font-weight: 700; color:#4a148c; line-height: 1.5; margin-bottom: 24px;">
+        Desafía a mas jugadores y aprende mientras te diviertes.<br>
+        Genera tu pregunta y empieza a jugar perraaaaa!!<br>
+        (toca el boton de ayuda para informacion de como mejorar tu experiencia)
+      </p>
+      <button onclick="cerrarBienvenida()" style="
+        background: linear-gradient(135deg, #7b1fa2, #ab47bc);
+        color: white;
+        border: none;
+        border-radius: 32px;
+        padding: 16px 48px;
+        font-size: 22px;
+        font-weight: 900;
+        box-shadow: 0 8px 26px rgba(123,31,162,0.8);
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s ease;
+      "
+      onmouseover="this.style.background='linear-gradient(135deg, #9c27b0, #ce93d8)';"
+      onmouseout="this.style.background='linear-gradient(135deg, #7b1fa2, #ab47bc)';">
+        Comenzar a jugar
+      </button>
+    </div>
+  </div>
+
+  <div id="modal-no-mas-preguntas" class="modal" style="display:none;">
+    <div class="modal-contenido" tabindex="0">
+      <button class="cerrar" onclick="cerrarNoMasPreguntas()">×</button>
+      <div style="font-size: 48px; margin-bottom: 12px;">❗</div>
+      <h2 style="color:#7b1fa2; margin-bottom: 20px;">¡Fin del juego!</h2>
+      <p id="texto-fin-juego" style="font-size: 18px; font-weight: 700; color:#4a148c; line-height: 1.5; margin-bottom: 24px;">
+        Ya no hay más preguntas disponibles en esta categoría.<br>
+        El juego termina de inmediato.<br>
+        ¡Gracias por jugar!
+      </p>
+      <button onclick="cerrarNoMasPreguntas()" style="
+        background: linear-gradient(135deg, #7b1fa2, #ab47bc);
+        color: white;
+        border: none;
+        border-radius: 32px;
+        padding: 16px 48px;
+        font-size: 22px;
+        font-weight: 900;
+        box-shadow: 0 8px 26px rgba(123,31,162,0.8);
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s ease;
+      "
+      onmouseover="this.style.background='linear-gradient(135deg, #9c27b0, #ce93d8)';"
+      onmouseout="this.style.background='linear-gradient(135deg, #7b1fa2, #ab47bc)';">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+  <div id="modal-ayuda" class="modal" style="display:none;">
+    <div class="modal-contenido">
+      <span class="cerrar" onclick="cerrarModal()">&times;</span>
+      <p>
+        📱 Para una mejor experiencia de juego, te recomendamos activar la vista de escritorio: En la parte superior del navegador (los tres puntos), selecciona "Sitio para computadora" luego pon el celular en horizontal y listo!<br><br>
+        ⬇️ Para continuar, elige una categoría y responde las preguntas.<br><br>
+        ✔️ Selecciona una opción y automáticamente aparecerá la respuesta y el puntaje.<br><br>
+        💡 ¡Diviértete y aprende mucho!
+      </p>
+    </div>
+  </div>
+
+  <script>
+ const preguntas = {
+  cafe: [
+    {
+      pregunta: "¿Cuál es la cantidad mínima de usuarios recomendada para descubrir la mayoría de los problemas de usabilidad en un test inicial?",
+      opciones: [
+        "a) 3-4 usuarios, para obtener una visión general",
+        "b) 5-7 usuarios, basándose en estudios que indican cobertura suficiente de problemas",
+        "c) Más de 15 usuarios, para asegurar representar todos los segmentos"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "Al iniciar una sesión de prueba con usuarios, ¿qué aspecto fundamental debe ser comunicado para generar confianza y garantizar resultados válidos?",
+      opciones: [
+        "a) Que se están evaluando las habilidades tecnológicas del usuario",
+        "b) Que el producto es el objeto de evaluación, no el usuario",
+        "c) Que deben hacer lo posible por evitar errores durante la prueba"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "Cuando se diseñan las tareas para un test de usabilidad, ¿cuál es la mejor forma de plantearlas para evitar sesgar el comportamiento y observar el uso real?",
+      opciones: [
+        "a) Proporcionar instrucciones detalladas paso a paso para cada acción",
+        "b) Establecer metas claras y concretas que los participantes deben alcanzar",
+        "c) Formular preguntas abiertas para que los usuarios exploren libremente"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "En el proceso de análisis de resultados en pruebas de usabilidad, ¿cuál es una práctica estándar para priorizar las intervenciones de diseño?",
+      opciones: [
+        "a) Listar todos los problemas detectados sin orden particular",
+        "b) Clasificar los problemas según su impacto en la experiencia, de crítico a menor gravedad",
+        "c) Enfocar solo en los problemas reportados por la mayoría de usuarios"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "Según Torres Burdiel, ¿qué consecuencias tiene retrasar excesivamente las pruebas con usuarios en el ciclo de desarrollo?",
+      opciones: [
+        "a) Ahorro en recursos si se corrigen fallos al final",
+        "b) Detección tardía de errores que incrementan costos y tiempo para corregirlos",
+        "c) Poco impacto en la calidad final si el diseño es sólido"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿En qué momento del desarrollo se recomienda integrar pruebas con usuarios para maximizar el beneficio de descubrir errores?",
+      opciones: [
+        "a) Solo en la fase de lanzamiento para validación final",
+        "b) Durante el prototipado, para realizar ajustes tempranos",
+        "c) Después del desarrollo completo, antes de producción"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "Antes de realizar pruebas con usuarios reales, ¿qué actividad previa puede aumentar la efectividad del test?",
+      opciones: [
+        "a) Revisión experta de usabilidad que identifica problemas evidentes",
+        "b) Campañas de marketing para atraer usuarios",
+        "c) Análisis estadístico de métricas existentes"
+      ],
+      correcta: "a"
+    },
+    {
+      pregunta: "¿Cuál es una ventaja principal de testear en la fase de prototipado?",
+      opciones: [
+        "a) Minimizar gastos evitando errores tardíos",
+        "b) Validar estrategias de marketing",
+        "c) Conseguir usuarios para probar la versión final"
+      ],
+      correcta: "a"
+    },
+    {
+      pregunta: "¿Qué beneficio tiene combinar una revisión experta con pruebas de usuario?",
+      opciones: [
+        "a) Concentrarse solo en problemas básicos",
+        "b) Obtener un diagnóstico reforzado y soluciones más completas",
+        "c) Reducir la carga sobre usuarios reales"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Qué diferencia principal existe entre una prueba de usabilidad y una encuesta tradicional?",
+      opciones: [
+        "a) La prueba es un experimento práctico enfocado en la interacción real",
+        "b) La encuesta se hace con mayor cantidad de usuarios",
+        "c) La prueba sólo utiliza preguntas abiertas"
+      ],
+      correcta: "a"
+    },
+    {
+      pregunta: "¿Por qué la observación directa es crucial en un test con usuarios?",
+      opciones: [
+        "a) Reemplaza la necesidad de entrevistas y cuestionarios",
+        "b) Permite detectar comportamientos y dificultades no expresadas verbalmente",
+        "c) Es menos costosa que otras técnicas"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Por qué es clave que los participantes en un test de usabilidad sean usuarios reales y representativos?",
+      opciones: [
+        "a) Porque diseñadores conocen mejor el producto",
+        "b) Porque reflejan patrones reales de uso y problemas específicos del público objetivo",
+        "c) Porque pueden aprender rápido el funcionamiento"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Cuál es el objetivo principal al identificar problemas en un test de usabilidad?",
+      opciones: [
+        "a) Documentar las dificultades como reporte",
+        "b) Implementar mejoras que optimicen la experiencia del usuario",
+        "c) Comprender las preferencias estéticas"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Por qué el enfoque coercitivo recomienda hacer pruebas con usuarios lo antes posible?",
+      opciones: [
+        "a) Para obtener reportes formales rápidos",
+        "b) Para evitar costos elevados y más tiempo si los errores se detectan tarde",
+        "c) Porque la experiencia se puede validar solo al final"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Qué plantea la estrategia de prototipado respecto al momento de hacer tests?",
+      opciones: [
+        "a) Iniciar pruebas solo en versión final para resultados definitivos",
+        "b) Probar con prototipos para ajustar tempranamente y ahorrar recursos",
+        "c) Usar únicamente feedback post lanzamiento"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Cuál es el propósito de una revisión experta de usabilidad antes de un test con usuarios?",
+      opciones: [
+        "a) Evitar la necesidad de tests posteriores",
+        "b) Detectar y corregir fallos básicos que facilitan la fase posterior",
+        "c) Validar únicamente el diseño visual"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "Según Torres Burriel, ¿cuál es el mejor momento para hacer tests con usuarios?",
+      opciones: [
+        "a) Al finalizar todo el desarrollo para tener una visión global",
+        "b) Lo antes posible, después de una revisión experta y en fases tempranas",
+        "c) Solo cuando los inversores lo soliciten"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "En un test con usuarios, ¿qué se busca principalmente observar?",
+      opciones: [
+        "a) Opiniones y valoraciones expresadas en encuestas",
+        "b) Número de visitas o clics realizados",
+        "c) Interacción real, dificultades y patrones de uso en el producto"
+      ],
+      correcta: "c"
+    },
+    {
+      pregunta: "¿Por qué diseñadores o desarrolladores podrían no detectar todos los problemas de usabilidad?",
+      opciones: [
+        "a) Porque su conocimiento técnico es insuficiente",
+        "b) Porque están demasiado familiarizados con la interfaz y no usan la perspectiva del usuario",
+        "c) Porque no tienen tiempo para hacer pruebas"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Qué caracteriza una prueba de usabilidad eficaz?",
+      opciones: [
+        "a) Es un experimento práctico donde se evalúa el uso real y la facilidad de interacción",
+        "b) Es una reunión de grupo para discutir diseño",
+        "c) Es una encuesta de satisfacción post uso"
+      ],
+      correcta: "a"
+    },
+    {
+      pregunta: "¿Cuál es el rol central de la observación durante un test con usuarios?",
+      opciones: [
+        "a) Complementar datos estadísticos con experiencias subjetivas",
+        "b) Ver directamente cómo interactúan y solucionan problemas los usuarios en tiempo real",
+        "c) Verificar validez de encuestas"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Por qué es fundamental incluir usuarios reales en las pruebas?",
+      opciones: [
+        "a) Porque aportan perspectivas frescas y uso genuino del producto",
+        "b) Porque desarrolladores pueden participar también",
+        "c) Porque son más baratos que expertos"
+      ],
+      correcta: "a"
+    },
+    {
+      pregunta: "¿Cuál es el principal resultado esperado de un test de usabilidad?",
+      opciones: [
+        "a) Validar el código y detectar bugs técnicos",
+        "b) Identificar barreras y mejorar la experiencia del usuario",
+        "c) Confirmar preferencias visuales del equipo"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Qué acciones se deben tomar tras detectar problemas en un test con usuarios?",
+      opciones: [
+        "a) Documentar y dejarlos para fases futuras",
+        "b) Implementar mejoras inmediatas en la interfaz",
+        "c) Repetir el test sin cambios"
+      ],
+      correcta: "b"
+    },
+    {
+      pregunta: "¿Cuál es el primer paso crucial para planificar un test con usuarios?",
+      opciones: [
+        "a) Seleccionar herramientas de grabación",
+        "b) Definir claramente los objetivos del test",
+        "c) Diseñar preguntas abiertas"
+      ],
+      correcta: "b"
+    }
+  ]
+};
+
+    let preguntaActual = null;
+    let categoriaActual = null;
+    let opcionSeleccionada = null;
+    let puntuacionTotal = 0;
+
+    // Para manejar las preguntas barajadas y el índice actual
+    let preguntasBarajadas = [];
+    let indicePreguntaActual = 0;
+
+    let timerInterval = null;
+    let tiempoRestante = 16;
+    let tiempoAcabado = false;
+
+     const ticTacAudio = new Audio('audio/corto.mp3');
+
+    // Función para barajar array (Fisher-Yates)
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function stopTemporizadorYAudio() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      ticTacAudio.pause();
+      ticTacAudio.currentTime = 0;
+      const temp = document.getElementById('temporizador');
+      if (temp) temp.style.display = 'none';
+    }
+
+    function mostrarFinJuego() {
+      stopTemporizadorYAudio();
+      const modal = document.getElementById('modal-no-mas-preguntas');
+      modal.style.display = 'flex';
+
+      const textoFin = document.getElementById('texto-fin-juego').innerText;
+      narrarTexto(textoFin, false);
+    }
+
+    function mostrarPregunta(cat) {
+      stopTemporizadorYAudio();
+
+      // Si categoría cambió o estamos comenzando, barajar preguntas
+      if (categoriaActual !== cat || preguntasBarajadas.length === 0) {
+        categoriaActual = cat;
+        preguntasBarajadas = shuffleArray([...preguntas[cat]]);
+        indicePreguntaActual = 0;
+      }
+
+      if (indicePreguntaActual >= preguntasBarajadas.length) {
+        mostrarFinJuego();
+        return;
+      }
+
+      preguntaActual = preguntasBarajadas[indicePreguntaActual];
+      indicePreguntaActual++;
+
+      document.getElementById('pregunta').textContent = preguntaActual.pregunta;
+      mostrarOpciones(preguntaActual.opciones);
+      document.getElementById('respuesta').textContent = "";
+      document.getElementById('confirmacion-puntos').style.display = "none";
+      document.getElementById('mensaje-puntos').textContent = "";
+      opcionSeleccionada = null;
+      tiempoAcabado = false;
+      bloquearOpciones(false);
+
+      const temp = document.getElementById('temporizador');
+      if (temp) temp.style.display = 'none';
+
+      narrarTexto(preguntaActual.pregunta, true);
+    }
+
+    function mostrarOpciones(opciones) {
+      const contenedorOpciones = document.getElementById('opciones');
+      contenedorOpciones.innerHTML = "";
+      opciones.forEach((opcion, i) => {
+        const div = document.createElement('div');
+        div.classList.add('opcion');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'opcion';
+        radio.id = `opcion${i}`;
+        radio.value = opcion.charAt(0);
+        radio.onclick = () => {
+          opcionSeleccionada = radio.value;
+          mostrarRespuestaInstantanea();
+        };
+        const label = document.createElement('label');
+        label.htmlFor = `opcion${i}`;
+        label.textContent = opcion;
+        div.appendChild(radio);
+        div.appendChild(label);
+        contenedorOpciones.appendChild(div);
+      });
+    }
+
+    function mostrarRespuestaInstantanea() {
+      if (!preguntaActual || !opcionSeleccionada) return;
+
+      stopTemporizadorYAudio();
+
+      const esCorrecta = (opcionSeleccionada === preguntaActual.correcta);
+      const respuestaTexto = esCorrecta
+        ? `¡Respuesta correcta! Es ${preguntaActual.opciones.find(op => op.charAt(0) === preguntaActual.correcta).slice(3)}.`
+        : `Respuesta incorrecta. La respuesta correcta es ${preguntaActual.opciones.find(op => op.charAt(0) === preguntaActual.correcta).slice(3)}.`;
+      document.getElementById('respuesta').textContent = respuestaTexto;
+      document.getElementById('confirmacion-puntos').style.display = "block";
+      document.getElementById('mensaje-puntos').textContent = "";
+      narrarTexto(respuestaTexto, false);
+      respuestaUsuario(esCorrecta);
+      bloquearOpciones(true);
+    }
+
+    function respuestaUsuario(acertado) {
+      if (!preguntaActual) return;
+      const mensaje = document.getElementById('mensaje-puntos');
+      if (acertado) {
+        puntuacionTotal += 100;
+        mensaje.style.color = '#1b5e20';
+        const texto = `¡Genial! Has ganado 100 puntos. Puntaje total: ${puntuacionTotal} puntos.`;
+        mensaje.textContent = texto;
+        narrarTexto(texto, false);
+      } else {
+        puntuacionTotal -= 50;
+        mensaje.style.color = '#b71c1c';
+        const texto = `Oh no, perdiste 50 puntos. Puntaje total: ${puntuacionTotal} puntos.`;
+        mensaje.textContent = texto;
+        narrarTexto(texto, false);
+      }
+    }
+
+    function bloquearOpciones(bloquear) {
+      const radios = document.querySelectorAll('#opciones input[type="radio"]');
+      radios.forEach(radio => {
+        radio.disabled = bloquear;
+      });
+    }
+
+    function narrarTexto(texto, esPregunta = false) {
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(texto);
+        utterance.lang = 'es-ES';
+        utterance.onend = () => {
+          if (preguntaActual && esPregunta && !tiempoAcabado) {
+            iniciarTemporizador();
+          }
+        };
+        speechSynthesis.speak(utterance);
+      } else {
+        if (esPregunta) {
+          iniciarTemporizador();
+        }
+      }
+    }
+
+    function iniciarTemporizador() {
+      stopTemporizadorYAudio();
+
+      tiempoRestante = 16;
+      tiempoAcabado = false;
+      let contenedorTemporizador = document.getElementById('temporizador');
+      if (!contenedorTemporizador) {
+        contenedorTemporizador = document.createElement('div');
+        contenedorTemporizador.id = 'temporizador';
+        contenedorTemporizador.style.fontSize = '20px';
+        contenedorTemporizador.style.color = '#b71c1c';
+        contenedorTemporizador.style.marginTop = '10px';
+        contenedorTemporizador.style.fontWeight = '700';
+        contenedorTemporizador.style.userSelect = 'none';
+        const preguntaDiv = document.getElementById('pregunta');
+        preguntaDiv.appendChild(contenedorTemporizador);
+      }
+      contenedorTemporizador.style.display = 'block';
+      contenedorTemporizador.textContent = `${tiempoRestante} segundos para responder`;
+
+      timerInterval = setInterval(() => {
+        if (tiempoRestante > 0) {
+          tiempoRestante--;
+          contenedorTemporizador.textContent = `${tiempoRestante} segundos para responder`;
+
+          if (ticTacAudio.paused) {
+            ticTacAudio.currentTime = 0;
+            ticTacAudio.play().catch(e => {});
+          }
+        } else {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          contenedorTemporizador.textContent = "Tiempo agotado, pierdes 50 puntos.";
+          tiempoAcabado = true;
+          manejarTiempoAgotado();
+        }
+      }, 1000);
+    }
+
+    function manejarTiempoAgotado() {
+      if (preguntaActual && opcionSeleccionada === null) {
+        puntuacionTotal -= 50;
+        document.getElementById('mensaje-puntos').style.color = '#b71c1c';
+        const texto = `Oh no, perdiste 50 puntos. Puntaje total: ${puntuacionTotal} puntos.`;
+        document.getElementById('mensaje-puntos').textContent = texto;
+        document.getElementById('confirmacion-puntos').style.display = "block";
+        narrarTexto(texto, false);
+        bloquearOpciones(true);
+      }
+    }
+
+    function abrirModal() {
+      document.getElementById('modal-ayuda').style.display = 'flex';
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal-ayuda').style.display = 'none';
+    }
+
+    function cerrarBienvenida() {
+      document.getElementById('modal-bienvenida').style.display = 'none';
+      document.getElementById('btn-ayuda').style.display = 'inline-block';
+    }
+
+    function cerrarNoMasPreguntas() {
+      document.getElementById('modal-no-mas-preguntas').style.display = 'none';
+    }
+
+    window.onload = function() {
+      document.getElementById('modal-bienvenida').style.display = 'flex';
+      document.getElementById('btn-ayuda').style.display = 'none';
+    };
+  </script>
+</body>
+</html>
+
+
